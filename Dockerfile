@@ -1,11 +1,11 @@
-# Use an official lightweight Python image
+# Use a lightweight official Python image
 FROM python:3.9-slim
 
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
-# Install system dependencies for Pillow and other C-based packages
+# Install required OS-level dependencies
 RUN apt-get update && apt-get install -y \
     build-essential \
     libjpeg-dev \
@@ -15,19 +15,20 @@ RUN apt-get update && apt-get install -y \
     liblcms2-dev \
     libwebp-dev \
     gcc \
+    default-libmysqlclient-dev \
+    pkg-config \
     && rm -rf /var/lib/apt/lists/*
 
 # Set working directory
 WORKDIR /app
 
-# Copy project files to the container
+# Copy project files
 COPY . /app
 
-# Upgrade pip and install Python dependencies
-RUN pip install --upgrade pip \
-    && pip install -r requirements.txt
+# Install Python dependencies
+RUN pip install --upgrade pip && pip install -r requirements.txt
 
-# Expose the port Flask runs on
+# Expose Flask port
 EXPOSE 5000
 
 # Run the app
