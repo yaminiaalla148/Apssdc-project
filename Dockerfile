@@ -1,21 +1,34 @@
-# Use the official Python image from Docker Hub
-FROM python:3.10-slim
+# Use an official lightweight Python image
+FROM python:3.9-slim
 
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
-# Set the working directory
+# Install system dependencies for Pillow and other C-based packages
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    libjpeg-dev \
+    zlib1g-dev \
+    libpng-dev \
+    libfreetype6-dev \
+    liblcms2-dev \
+    libwebp-dev \
+    gcc \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set working directory
 WORKDIR /app
 
-# Copy the app files
+# Copy project files to the container
 COPY . /app
 
-# Install dependencies
-RUN pip install --upgrade pip && pip install -r requirements.txt
+# Upgrade pip and install Python dependencies
+RUN pip install --upgrade pip \
+    && pip install -r requirements.txt
 
-# Expose the port (adjust if your app uses a different one)
+# Expose the port Flask runs on
 EXPOSE 5000
 
-# Run the application
+# Run the app
 CMD ["python", "app.py"]
