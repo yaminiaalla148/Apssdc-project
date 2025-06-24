@@ -17,19 +17,6 @@ The Student Management System is a web application built using Flask and SQLAlch
 - Edit existing student records
 - Delete student records
 
-## Installation
-1. Clone the repository or download the source code.
 
-    git clone https://github.com/LoydNgei/Student_Management_System
-
-2. Make sure you have Python installed (version 3.6 or higher).
-
-3. Install the required dependencies by running the following command:
-
-    pip install -r requirements.txt
-
-4. Start the application by running the following command:
-
-    flask run
 
 
