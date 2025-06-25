@@ -1,0 +1,38 @@
+name: Build & Deploy Flask App
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name:  Checkout code
+      uses: actions/checkout@v3
+
+    - name:  Log in to Docker Hub
+      run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+    - name: 🛠 Build Docker image
+      run: docker build -t ${{ secrets.DOCKER_USERNAME }}/apssdc-flask-app:latest .
+
+    - name: 📤 Push Docker image to Docker Hub
+      run: docker push ${{ secrets.DOCKER_USERNAME }}/apssdc-flask-app:latest
+
+    - name: 🔐 Setup SSH key
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ secrets.EC2_KEY }}" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
+
+    - name: 🚀 Deploy to EC2 via SSH
+      run: |
+        ssh -i ~/.ssh/id_rsa ubuntu@${{ secrets.EC2_HOST }} << EOF
+          docker pull ${{ secrets.DOCKER_USERNAME }}/apssdc-flask-app:latest
+          docker stop apssdc-container || true
+          docker rm apssdc-container || true
+          docker run -d --name apssdc-container -p 5000:5000 ${{ secrets.DOCKER_USERNAME }}/apssdc-flask-app:latest
+        EOF
