@@ -1,12 +1,12 @@
-name: Build & Deploy Flask App using EC2 Self-Hosted Runner
+name: Build & Deploy Flask App using EC2 Self-Hosted Runner + SSH
 
 on:
   push:
-    branches: [ main ]  # Trigger only when code is pushed to main branch
+    branches: [ main ]
 
 jobs:
   build-and-deploy:
-    runs-on: self-hosted  # This makes GitHub Actions use your EC2 instance
+    runs-on: self-hosted  # Runs inside your EC2 instance
 
     steps:
     - name:  Checkout code
@@ -21,9 +21,21 @@ jobs:
     - name:  Push Docker image to Docker Hub
       run: docker push ${{ secrets.DOCKER_USERNAME }}/apssdc-flask-app:latest
 
-    - name:  Deploy Container on EC2 (Self-hosted)
+    - name:  Deploy on same EC2 (Self-hosted)
       run: |
         docker stop apssdc-container || true
         docker rm apssdc-container || true
         docker pull ${{ secrets.DOCKER_USERNAME }}/apssdc-flask-app:latest
         docker run -d --name apssdc-container -p 5000:5000 ${{ secrets.DOCKER_USERNAME }}/apssdc-flask-app:latest
+
+    - name:  Deploy on remote EC2 via SSH
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.PROD_SERVER_HOST }}
+        username: ${{ secrets.PROD_SERVER_USER }}
+        key: ${{ secrets.PROD_SSH_PRIVATE_KEY }}
+        script: |
+          docker stop apssdc-container || true
+          docker rm apssdc-container || true
+          docker pull ${{ secrets.DOCKER_USERNAME }}/apssdc-flask-app:latest
+          docker run -d --name apssdc-container -p 5000:5000 ${{ secrets.DOCKER_USERNAME }}/apssdc-flask-app:latest
