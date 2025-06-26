@@ -1,4 +1,3 @@
-# Use a lightweight official Python image
 FROM python:3.9-slim
 
 # Set environment variables
@@ -25,8 +24,8 @@ WORKDIR /app
 # Copy project files
 COPY . /app
 
-# Install Python dependencies
-RUN pip install --upgrade pip && pip install -r requirements.txt
+#  Install Python dependencies 
+RUN pip install --upgrade pip && pip install --use-pep517 -r requirements.txt
 
 # Expose Flask port
 EXPOSE 5000
