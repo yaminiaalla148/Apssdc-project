@@ -17,7 +17,7 @@
                 <p>{{ student.age }} years old.</p>
                 <p>Joined: {{ student.created_at }}</p>
                 <div class="bio">
-                    <h4>Bio</h4>
+                    <h4>about</h4>
                     <p>{{ student.bio }}</p>
                 </div>
                 <a href="{{ url_for('edit', student_id=student.id) }}">Edit</a>
